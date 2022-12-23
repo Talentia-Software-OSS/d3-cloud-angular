@@ -1,14 +1,14 @@
-import { NumberValue, scaleLinear, scaleOrdinal } from "d3-scale";
+import { ScaleLinear, scaleLinear, ScaleOrdinal, scaleOrdinal } from "d3-scale";
 import { schemeCategory10 } from "d3-scale-chromatic";
+import { Random } from 'random'
 import { AngularD3CloudOptions, AngularD3Word } from "./angular-d3-cloud.interfaces";
 
-const rotateScale = (range: Iterable<number>, domain: Iterable<NumberValue>) => scaleLinear().range(range).domain(domain);
-const fill = (schema: readonly string[]) => scaleOrdinal(schema);
-const defaultFill = fill(schemeCategory10);  
-const defaultRotateScale = rotateScale([-90, 90], [0, 1]);
+const defaultRandom: Random = new Random();
+const defaultFill: ScaleOrdinal<string, string, never> = scaleOrdinal(schemeCategory10);  
+const defaultRotateScale: ScaleLinear<number, number, never> = scaleLinear().range([-90, 90]).domain([0, 1]);
 const defaultFillMapper = (word: AngularD3Word, index: number): string => defaultFill(index.toString());
 const defaultSizeMapper = (word: AngularD3Word, index: number): number => word.value;
-const defaultRotate = (): number => defaultRotateScale(Math.random());
+const defaultRotate = (): number => defaultRotateScale(defaultRandom.next());
 
 export const defaultOptions: AngularD3CloudOptions = {
   data: [],

@@ -23,32 +23,18 @@ export class AngularD3CloudService {
     this.wordMouseOut = new Subject<{ event: MouseEvent, word: AngularD3Word }>();     
   }
 
-  public renderCloudSync(node: Element, options: AngularD3CloudOptions = defaultOptions): TypeError | null {
-    const error = this.validateData(node, options);
-    if(error) {
-      return error;
+  public renderCloud(node: Element | null, options: AngularD3CloudOptions = defaultOptions): TypeError[] | null {
+    const errors = this.validateData(node, options);
+    if(errors != null && errors.length > 0) {
+      return errors;
     }
 
-    this.renderCloud(node, options);
+    this.render(node as Element, options);
 
     return null;
   }
 
-  public renderCloudAsync(node: Element, options: AngularD3CloudOptions = defaultOptions): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const error = this.validateData(node, options);
-      if(error) {
-        return reject(error);
-      }
-
-      this.renderCloud(node, options);
-
-      return resolve();
-
-    });
-  }
-
-  private renderCloud(node: Element, options: AngularD3CloudOptions): void {
+  private render(node: Element, options: AngularD3CloudOptions): void {
     select(node)
       .selectAll('*')
       .remove();
@@ -86,7 +72,7 @@ export class AngularD3CloudService {
                 return defaultOptions.fillMapper!(word as AngularD3Word, index);
               }                
             } else {
-              return null
+              return null;
             }
           })
           .attr('text-anchor', 'middle')
@@ -96,7 +82,7 @@ export class AngularD3CloudService {
           texts
             .attr('transform', data => `translate(${[data.x, data.y]})rotate(${data.rotate})`)
             .style('font-size', data => `${data.size}px`)
-            .style("fill-opacity", 1)
+            .style("fill-opacity", 1);
         } else {
           // Initial status
           texts
@@ -114,19 +100,19 @@ export class AngularD3CloudService {
 
         if(options.mouseClickObserved) {
           texts.on('click', (event: MouseEvent, word: any) => {
-            this.wordMouseClick.next({ event, word })
+            this.wordMouseClick.next({ event, word });
           });
         }        
         
         if(options.mouseOverObserved) {
           texts.on('mouseover', (event: MouseEvent, word: any) => {
-            this.wordMouseOver.next({ event, word })
+            this.wordMouseOver.next({ event, word });
           });
         }        
 
         if(options.mouseOutObserved) {
           texts.on('mouseout', (event: MouseEvent, word: any) => {
-            this.wordMouseOut.next({ event, word })
+            this.wordMouseOut.next({ event, word });
           });
         }        
       });
@@ -140,51 +126,102 @@ export class AngularD3CloudService {
     return canvas;
   }
 
-  private validateData(node: Element, options: AngularD3CloudOptions): TypeError | null {
-    if (!node) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [node] must be an element. Current value is: [${node}]`);
-    }
+  private validateData(node: Element | null, options: AngularD3CloudOptions): TypeError[] | null {
+    const validated: TypeError[] = [];
 
-    if (!options.data || !Array.isArray(options.data)) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [data] must be an array. Current value is: [${options.data}]`);
-    }
+    this.validateNode(validated, node);
+    this.validateOptionsData(validated, options);
+    this.validateHeight(validated, options);
+    this.validateWidth(validated, options);
+    this.validatePadding(validated, options);
+    this.validateFont(validated, options);
+    this.validateFontSizeMapper(validated, options);
+    this.validateFillMapper(validated, options);  
+    this.validateRotate(validated, options);
+    this.validateAutoFill(validated, options);
+    this.validateFontWeight(validated, options); 
 
-    if (options.height === null || options.height === undefined || isNaN(options.height) || options.height <= 0) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [height] must be a positive number (greater than 0). Current value is: [${options.height}]`)
-    }
-
-    if (options.width === null || options.width === undefined || isNaN(options.width) || options.width <= 0) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [width] must be a positive number (greater than 0). Current value is: [${options.width}]`)
-    }
-
-    if (options.padding == null || options.padding === undefined || !['number', 'function'].includes(typeof options.padding) || options.padding < 0) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [padding] must be a positive number or function. Current value is: [${options.padding}]`)
-    }
-
-    if (options.font === null || options.font === undefined || !['string', 'function'].includes(typeof options.font)) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [font] must be a positive string or function. Current value is: [${options.font}]`)
-    }
-
-    if (!options.fontSizeMapper || typeof options.fontSizeMapper !== 'function') {
-      return new TypeError(`${AngularD3CloudService.TAG}: [fontSizeMapper] must be a function. Current value is: [${options.fontSizeMapper}]`)
-    }
-
-    if (options.fillMapper && typeof options.fillMapper !== 'function') {
-      return new TypeError(`${AngularD3CloudService.TAG}: [fillMapper] must be a function. Current value is: [${options.fillMapper}]`)
-    }
-
-    if (options.rotate === null || options.rotate === undefined || !['number', 'function'].includes(typeof options.rotate) || options.rotate < 0) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [rotate] must be a positive number or function. Current value is: [${options.rotate}]`)
-    }
-
-    if (options.autoFill === null || options.autoFill === undefined || typeof options.autoFill !== 'boolean') {
-      return new TypeError(`${AngularD3CloudService.TAG}: [autoFill] must be boolean. Current value is: [${options.autoFill}]`)
-    }
-
-    if (options.fontWeight === null || options.fontWeight === undefined || !['number', 'string'].includes(typeof options.fontWeight)) {
-      return new TypeError(`${AngularD3CloudService.TAG}: [fontWeight] must be a positive number or a string. Current value is: [${options.fontWeight}]`)
+    if(validated.length > 0) {
+      return validated;
     }
 
     return null;
+  }
+
+  private validateNode(validated: TypeError[], node: Element | null): void {
+    if (!node) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [node] must be an element. Current value is: [${node}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateOptionsData(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (!options.data || !Array.isArray(options.data)) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [data] must be an array. Current value is: [${options.data}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateHeight(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.height === null || options.height === undefined || isNaN(options.height) || options.height <= 0) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [height] must be a positive number (greater than 0). Current value is: [${options.height}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateWidth(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.width === null || options.width === undefined || isNaN(options.width) || options.width <= 0) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [width] must be a positive number (greater than 0). Current value is: [${options.width}]`);
+      validated.push(error);
+    }
+  }
+
+  private validatePadding(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.padding == null || options.padding === undefined || !['number', 'function'].includes(typeof options.padding) || options.padding < 0) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [padding] must be a positive number or function. Current value is: [${options.padding}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateFont(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.font === null || options.font === undefined || !['string', 'function'].includes(typeof options.font)) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [font] must be a positive string or function. Current value is: [${options.font}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateFontSizeMapper(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (!options.fontSizeMapper || typeof options.fontSizeMapper !== 'function') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [fontSizeMapper] must be a function. Current value is: [${options.fontSizeMapper}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateFillMapper(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.fillMapper && typeof options.fillMapper !== 'function') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [fillMapper] must be a function. Current value is: [${options.fillMapper}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateRotate(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.rotate === null || options.rotate === undefined || !['number', 'function'].includes(typeof options.rotate) || options.rotate < 0) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [rotate] must be a positive number or function. Current value is: [${options.rotate}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateAutoFill(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.autoFill === null || options.autoFill === undefined || typeof options.autoFill !== 'boolean') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [autoFill] must be boolean. Current value is: [${options.autoFill}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateFontWeight(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.fontWeight === null || options.fontWeight === undefined || !['number', 'string'].includes(typeof options.fontWeight)) {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [fontWeight] must be a positive number or a string. Current value is: [${options.fontWeight}]`);
+      validated.push(error);
+    }
   }
 }

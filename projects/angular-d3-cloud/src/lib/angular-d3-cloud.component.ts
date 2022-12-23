@@ -6,8 +6,7 @@ import { defaultOptions } from './utility';
 
 @Component({
   selector: 'angular-d3-cloud',
-  templateUrl: './angular-d3-cloud.component.html',
-  styleUrls: ['./angular-d3-cloud.component.css']
+  templateUrl: './angular-d3-cloud.component.html'
 })
 export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('wordcloud', { static: false }) wordcloud: ElementRef<HTMLDivElement> | undefined;
@@ -28,11 +27,14 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
   @Output() wordMouseOver = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOut = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
 
+  private options!: AngularD3CloudOptions;
   private wordMouseClickSubscriber: Subscription;
   private wordMouseOverSubscriber: Subscription;
   private wordMouseOutSubscriber: Subscription;
 
   constructor(private cloudService: AngularD3CloudService) { 
+    this.options = this.createOptions();
+
     this.wordMouseClickSubscriber = this.cloudService.wordMouseClick.subscribe((data) => {
       this.wordClick.emit(data);
     });   
@@ -44,12 +46,12 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     });
   }
 
-  ngAfterViewInit(): Promise<void> {
-    return this.renderCloudAsync(); 
+  ngAfterViewInit(): void {
+    this.renderCloud(); 
   }
 
-  ngOnChanges(changes: SimpleChanges): Promise<void> {
-    return this.renderCloudAsync();
+  ngOnChanges(changes: SimpleChanges): void {
+    this.renderCloud();
   }
 
   ngOnDestroy(): void {
@@ -66,19 +68,13 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     } 
   }
 
-  private renderCloudAsync(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (this.wordcloud) {
-        this.cloudService.renderCloudAsync(this.wordcloud?.nativeElement!, this.createOptions())
-        .then(() => resolve())
-        .catch((reason) => {
-          console.error(reason);
-          resolve();
-        });
-      } else {        
-        resolve();
-      }      
-    });  
+  private renderCloud(): void {
+    if (this.wordcloud != null) {
+      const errors = this.cloudService.renderCloud(this.wordcloud?.nativeElement, this.applyOptions());
+      if(errors != null && errors.length > 0) {
+        console.error(errors);
+      }     
+    }  
   }
 
   private cloneData(values: AngularD3Word[] | undefined): AngularD3Word[] {
@@ -92,7 +88,7 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
 
   private createOptions(): AngularD3CloudOptions {
     return {
-      data: this.cloneData(this.data),
+      data: this.data,
       width: this.width,
       height: this.height,
       padding: this.padding,
@@ -105,7 +101,26 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
       fontWeight: this.fontWeight,
       mouseClickObserved: this.wordClick.observed,
       mouseOverObserved: this.wordMouseOver.observed,
-      mouseOutObserved: this.wordMouseOut.observed,
+      mouseOutObserved: this.wordMouseOut.observed
     };
+  }
+
+  private applyOptions(): AngularD3CloudOptions {
+    this.options.data = this.cloneData(this.data);
+    this.options.width = this.width;
+    this.options.height = this.height;
+    this.options.padding = this.padding;
+    this.options.font = this.font;
+    this.options.fontSizeMapper = this.fontSizeMapper;
+    this.options.rotate = this.rotate;
+    this.options.autoFill = this.autoFill;
+    this.options.fillMapper = this.fillMapper;
+    this.options.animations = this.animations;
+    this.options.fontWeight = this.fontWeight;
+    this.options.mouseClickObserved = this.wordClick.observed;
+    this.options.mouseOverObserved = this.wordMouseOver.observed;
+    this.options.mouseOutObserved = this.wordMouseOut.observed;   
+    
+    return this.options;
   }
 }

@@ -45,8 +45,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
-
-.sonarqube
-.jest-cache
 .angular
+.jest-cache
 coverage
+.scannerwork
+.sonarqube
+.sonar

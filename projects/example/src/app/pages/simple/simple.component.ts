@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { AngularD3CloudModule, AngularD3Word } from 'angular-d3-cloud';
+import { AngularD3CloudModule, AngularD3Word } from '@talentia/angular-d3-cloud';
 
 @Component({
   selector: 'app-simple',
   templateUrl: './simple.component.html',
-  styleUrls: ['./simple.component.css'],
   standalone: true,
   imports: [AngularD3CloudModule],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,5 +22,4 @@ export class SimpleComponent implements OnInit {
       return { text: word, value: 10 + Math.random() * 90 };
     });
   }
-
 }

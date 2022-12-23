@@ -10,7 +10,8 @@ const esModules = [
   'd3-color', 
   'd3-format', 
   'd3-time',
-  'internmap'
+  'internmap',
+  'random'
 ];
 
 // eslint-disable-next-line no-undef
@@ -29,19 +30,21 @@ module.exports = {
   coverageReporters: ['lcov', 'text'],
   coverageProvider: 'v8', 
   coveragePathIgnorePatterns: [
+    '<rootDir>/.angular/',
+    '<rootDir>/.github/',    
+    '<rootDir>/.jest-cache/',
+    '<rootDir>/.git/',
     '<rootDir>/dist/',
-    '<rootDir>/node_modules/',    
-    '<rootDir>/jest-global-mocks.ts'    
+    '<rootDir>/node_modules/'
   ], 
   cacheDirectory: '.jest-cache',
   resolver: 'jest-preset-angular/build/resolvers/ng-jest-resolver.js',
   transformIgnorePatterns: [`node_modules/(?!.*\\.mjs$|${esModules.join('|')})`],
   roots: [
-    '<rootDir>/projects/angular-d3-cloud/src/',
-    '<rootDir>/projects/example/src/'
+    '<rootDir>/projects/angular-d3-cloud/src/'
   ],
   moduleNameMapper: {
-    '^angular-d3-cloud$': '<rootDir>/dist/angular-d3-cloud'
+    '^@talentia/angular-d3-cloud$': '<rootDir>/dist/angular-d3-cloud'
   },
   globals: {
     'ts-jest': {

@@ -31,7 +31,6 @@
     "d3-scale-chromatic": "3.0.0",
     "d3-selection": "3.0.0",
     "d3-transition": "3.0.1",
-    "random": "4.1.0",
     "rxjs": "7.5.7",
     "tslib": "2.4.1",
     "zone.js": "0.12.0"

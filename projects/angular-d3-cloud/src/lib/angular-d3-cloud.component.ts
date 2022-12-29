@@ -1,8 +1,8 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, AfterViewInit, Output, SimpleChanges, ViewChild, OnDestroy } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, AfterViewInit, Output, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AngularD3CloudOptions, AngularD3Word } from './angular-d3-cloud.interfaces';
 import { AngularD3CloudService } from './angular-d3-cloud.service';
-import { defaultOptions } from './utility';
+import { clone, defaultOptions, hasChanges } from './angular-d3-cloud.utilities';
 
 @Component({
   selector: 'angular-d3-cloud',
@@ -11,28 +11,32 @@ import { defaultOptions } from './utility';
 export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('wordcloud', { static: false }) wordcloud: ElementRef<HTMLDivElement> | undefined;
 
-  @Input() data?: AngularD3Word[] = [];
-  @Input() width?: number = defaultOptions.width;
-  @Input() height?: number = defaultOptions.height;
-  @Input() padding?: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.padding;
-  @Input() font?: string | ((word: AngularD3Word, index: number) => string) = defaultOptions.font;
-  @Input() fontSizeMapper?: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.fontSizeMapper;
-  @Input() rotate?: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.rotate;
-  @Input() autoFill?: boolean = defaultOptions.autoFill;
-  @Input() fillMapper?: (word: AngularD3Word, index: number) => string = defaultOptions.fillMapper;
-  @Input() animations?: boolean = defaultOptions.animations;
-  @Input() fontWeight?: string | number | ((word: AngularD3Word, index: number) => string | number) = defaultOptions.fontWeight;
+  @Input() data: AngularD3Word[] = [];
+  @Input() width: number = defaultOptions.width;
+  @Input() height: number = defaultOptions.height;
+  @Input() padding: number = defaultOptions.padding;
+  @Input() font: string = defaultOptions.font;
+  @Input() fontSizeMapper: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.fontSizeMapper;
+  @Input() rotate: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.rotate;
+  @Input() autoFill: boolean = defaultOptions.autoFill;
+  @Input() fillMapper: (word: AngularD3Word, index: number) => string = defaultOptions.fillMapper;
+  @Input() animations: boolean = defaultOptions.animations;
+  @Input() speed: number = defaultOptions.speed;
+  @Input() fontWeight: string | number = defaultOptions.fontWeight;
+  @Input() fontStyle: string = defaultOptions.fontStyle;
 
   @Output() wordClick = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOver = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOut = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
 
-  private options!: AngularD3CloudOptions;
+  private cloudService: AngularD3CloudService;
+  private options: AngularD3CloudOptions;
   private wordMouseClickSubscriber: Subscription;
   private wordMouseOverSubscriber: Subscription;
   private wordMouseOutSubscriber: Subscription;
 
-  constructor(private cloudService: AngularD3CloudService) { 
+  constructor() { 
+    this.cloudService = inject(AngularD3CloudService);
     this.options = this.createOptions();
 
     this.wordMouseClickSubscriber = this.cloudService.wordMouseClick.subscribe((data) => {
@@ -51,7 +55,9 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.renderCloud();
+    if(hasChanges(changes)) {
+      this.renderCloud();
+    }   
   }
 
   ngOnDestroy(): void {
@@ -72,18 +78,10 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     if (this.wordcloud != null) {
       const errors = this.cloudService.renderCloud(this.wordcloud?.nativeElement, this.applyOptions());
       if(errors != null && errors.length > 0) {
-        console.error(errors);
+        const messages = errors.map((error) => error.message);
+        console.error(...messages);
       }     
     }  
-  }
-
-  private cloneData(values: AngularD3Word[] | undefined): AngularD3Word[] {
-    if(!values) {
-      return [];
-    }
-    const result: AngularD3Word[] = [];
-    values.forEach(value => result.push(Object.assign({}, value)));
-    return result;
   }
 
   private createOptions(): AngularD3CloudOptions {
@@ -98,7 +96,9 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
       autoFill: this.autoFill,
       fillMapper: this.fillMapper,
       animations: this.animations,
+      speed: this.speed,
       fontWeight: this.fontWeight,
+      fontStyle: this.fontStyle,
       mouseClickObserved: this.wordClick.observed,
       mouseOverObserved: this.wordMouseOver.observed,
       mouseOutObserved: this.wordMouseOut.observed
@@ -106,7 +106,7 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
   }
 
   private applyOptions(): AngularD3CloudOptions {
-    this.options.data = this.cloneData(this.data);
+    this.options.data = clone(this.data);
     this.options.width = this.width;
     this.options.height = this.height;
     this.options.padding = this.padding;
@@ -116,7 +116,9 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     this.options.autoFill = this.autoFill;
     this.options.fillMapper = this.fillMapper;
     this.options.animations = this.animations;
+    this.options.speed = this.speed;
     this.options.fontWeight = this.fontWeight;
+    this.options.fontStyle = this.fontStyle;
     this.options.mouseClickObserved = this.wordClick.observed;
     this.options.mouseOverObserved = this.wordMouseOver.observed;
     this.options.mouseOutObserved = this.wordMouseOut.observed;   

@@ -3,7 +3,15 @@
         <div class="col-md-12">            
             <p class="lead mt-3">Change the options to apply and reload</p>
             <hr class="my-4">
-            <form class="row row-cols-lg-auto g-3 align-items-center">              
+            <form class="row row-cols-lg-auto g-3 align-items-center">                
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input [(ngModel)]="rotation" [ngModelOptions]="{standalone: true}" [checked]="rotation" class="form-check-input" type="checkbox" id="rotateFormCheck">
+                    <label class="form-check-label" for="rotateFormCheck">Rotate</label>
+                  </div>
+                </div>                
+
                 <div class="col-12">
                   <div class="form-check">
                     <input [(ngModel)]="animations" [ngModelOptions]="{standalone: true}" [checked]="animations" class="form-check-input" type="checkbox" id="animationsFormCheck">
@@ -12,17 +20,15 @@
                 </div>
 
                 <div class="col-12">
-                  <div class="form-check">
-                    <input [(ngModel)]="rotation" [ngModelOptions]="{standalone: true}" [checked]="rotation" class="form-check-input" type="checkbox" id="rotateFormCheck">
-                    <label class="form-check-label" for="rotateFormCheck">Rotate</label>
-                  </div>
-                </div>
-
-                <div class="col-12">
-                  <div class="form-check">
-                    <input [(ngModel)]="autoFill" [ngModelOptions]="{standalone: true}" [checked]="autoFill" class="form-check-input" type="checkbox" id="autofillFormCheck">
-                    <label class="form-check-label" for="autofillFormCheck">Auto-Fill</label>
-                  </div>
+                  <label class="sr-only visually-hidden" for="speedFormSelect">Speed</label>
+                  <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Speed</div>
+                    </div>
+                    <select [(ngModel)]="speed" [ngModelOptions]="{standalone: true}" [disabled]="!animations" class="form-select" id="speedFormSelect">
+                      <option *ngFor="let item of speeds" [value]="item">{{item}}</option>
+                    </select>
+                  </div>                    
                 </div>
 
                 <div class="col-12">
@@ -34,6 +40,13 @@
                     <select [(ngModel)]="padding" [ngModelOptions]="{standalone: true}" class="form-select" id="paddingFormSelect">
                       <option *ngFor="let item of paddings" [ngValue]="item">{{item}}</option>
                     </select>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input [(ngModel)]="autoFill" [ngModelOptions]="{standalone: true}" [checked]="autoFill" class="form-check-input" type="checkbox" id="autofillFormCheck">
+                    <label class="form-check-label" for="autofillFormCheck">Auto-Fill</label>
                   </div>
                 </div>
 
@@ -50,13 +63,37 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="sr-only visually-hidden" for="fontFormSelect">Font</label>
+                  <label class="sr-only visually-hidden" for="fontFormSelect">Font Family</label>
                   <div class="input-group mb-2">
                     <div class="input-group-prepend">
-                      <div class="input-group-text">Font</div>
+                      <div class="input-group-text">Font Family</div>
                     </div>
                     <select [(ngModel)]="font" [ngModelOptions]="{standalone: true}" class="form-select" id="fontFormSelect">
                       <option *ngFor="let item of fonts" [value]="item">{{item}}</option>
+                    </select>
+                  </div>                    
+                </div>
+
+                <div class="col-12">
+                  <label class="sr-only visually-hidden" for="weightFormSelect">Font Weight</label>
+                  <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Font Weight</div>
+                    </div>
+                    <select [(ngModel)]="weight" [ngModelOptions]="{standalone: true}" class="form-select" id="weightFormSelect">
+                      <option *ngFor="let item of weights" [value]="item.value">{{item.text}}</option>
+                    </select>
+                  </div>                    
+                </div>
+
+                <div class="col-12">
+                  <label class="sr-only visually-hidden" for="fontFormSelect">Font Style</label>
+                  <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Font Style</div>
+                    </div>
+                    <select [(ngModel)]="style" [ngModelOptions]="{standalone: true}" class="form-select" id="styleFormSelect">
+                      <option *ngFor="let item of styles" [value]="item">{{item}}</option>
                     </select>
                   </div>                    
                 </div>
@@ -67,12 +104,15 @@
                   [data]="data"   
                   [width]="700"
                   [height]="600"
-                  [font]="font"                                 
+                  [font]="font"
+                  [fontWeight]="weight"
+                  [fontStyle]="style"
                   [padding]="padding"
                   [rotate]="rotate"                  
                   [autoFill]="autoFill"
                   [fillMapper]="fillMapper"
                   [animations]="animations"
+                  [speed]="speed"
                   (wordClick)="onWordClick($event)">
                 </angular-d3-cloud>
             </p> 

@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "angular-d3-cloud": [
+      "@talentia/angular-d3-cloud": [
         "dist/angular-d3-cloud/angular-d3-cloud",
         "dist/angular-d3-cloud"
       ]

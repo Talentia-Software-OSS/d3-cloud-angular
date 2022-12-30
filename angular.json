@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-d3-cloud": {
+    "@talentia/angular-d3-cloud": {
       "projectType": "library",
       "root": "projects/angular-d3-cloud",
       "sourceRoot": "projects/angular-d3-cloud/src",

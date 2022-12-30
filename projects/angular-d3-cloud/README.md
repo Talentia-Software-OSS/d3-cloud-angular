@@ -12,12 +12,18 @@ D3 Cloud component for Angular built upon d3-cloud
 
 </details>
 
-<img src="./demo.png">
-
 # Installation
 ```
-npm install --save @talentia/angular-d3-cloud@1.4.1
+npm install --save @talentia/angular-d3-cloud@1.4.2
 ```
+
+Installing the package does not install the type definitions for d3-cloud, d3-scale, d3-scale-chromatic, d3-selection and d3-transition libraries.
+If you need to use these libraries in your project then install the type definitions with the following command:
+
+```
+npm i --save-dev @types/d3-cloud@1.2.5 @types/d3-scale@4.0.2 @types/d3-scale-chromatic@3.0.0 @types/d3-selection@3.0.3 @types/d3-transition@3.0.2
+```
+
 # Usage
 First import the package to your app module
 ```ts
@@ -42,39 +48,40 @@ Now the component is ready to use.
 export class AppComponent implements OnInit {
    @Input() data!: AngularD3Word[];
 
-  private words = ['Exercitation', 'duis', 'ex', 'laboris', 'laboris', 'est', 'aliqua', 'Lorem', 'veniam', 'ad.', 'Minim', 'aliqua', 'enim', 'do', 'exercitation', 'duis', 'eiusmod', 'sunt', 'do', 'exercitation', 'qui', 'ex.', 'Aliqua', 'velit', 'sunt', 'in', 'commodo', 'anim.', 'Sunt', 'labore', 'sunt', 'dolor', 'exercitation', 'non', 'commodo', 'laboris', 'culpa', 'culpa', 'exercitation', 'ex', 'proident', 'laborum.\n\nId', 'dolore', 'commodo', 'occaecat', 'in', 'velit.', 'Aliqua', 'mollit', 'ea', 'qui', 'ad', 'aute', 'est', 'excepteur', 'non', 'aliqua', 'occaecat', 'ad', 'non', 'ea.', 'Labore', 'incididunt', 'excepteur', 'tempor', 'culpa', 'proident', 'ex', 'commodo.', 'Nisi', 'nostrud', 'tempor', 'deserunt', 'ipsum', 'adipisicing', 'aute', 'do', 'adipisicing.\n\nOfficia', 'pariatur', 'eiusmod', 'tempor', 'magna', 'occaecat.', 'Ut', 'proident', 'anim', 'aute', 'aliquip', 'pariatur', 'et.', 'Pariatur', 'ad', 'ea', 'sint', 'ut', 'excepteur', 'amet', 'id', 'do.', 'Labore', 'eu', 'velit', 'non', 'cillum', 'nulla.\n\nIncididunt', 'duis', 'tempor', 'sunt', 'dolor', 'magna', 'occaecat', 'esse', 'elit', 'consequat.', 'Ea', 'sint', 'et', 'labore', 'amet', 'ullamco', 'non', 'tempor.', 'Ad', 'voluptate', 'nisi', 'duis', 'minim', 'elit', 'in', 'adipisicing', 'et', 'laboris', 'nulla', 'culpa', 'ad'];
+     private words = ["Exercitation","duis","ex","laboris","est","aliqua","Lorem","veniam","ad","Minim","enim","do","exercitation","eiusmod","sunt","qui","Aliqua","velit","in","commodo","anim","Sunt","labore","dolor","non","culpa","proident","laborum","dolore","occaecat","mollit","ea","aute","excepteur","Labore","incididunt","tempor","Nisi","nostrud","deserunt","ipsum","adipisicing","pariatur","magna","Ut","aliquip","et","Pariatur","sint","ut","amet","id","eu","cillum","nulla","esse","elit","consequat","Ea","ullamco","Ad","voluptate","nisi","minim"];
 
-  ngOnInit(): void {
-    this.refresh();
-  } 
-
-  refresh(): void {
+   ngOnInit(): void {
     this.data = this.words.map((word) => {
-      return { text: word, value: 10 + Math.random() * 90 };
+      return { text: word, value: 10 + Math.random() * 90 } as AngularD3Word;
     });
-  }
+  } 
 }
 ```
 # Props
-| Name           | Description                                                                                                | Type                                          | Required | Default             |
-|----------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|----------|---------------------|
-| data           | The input data for rendering                                                                               | Array<{ text: string, value: number }>        |     ✓    |                     |
-| width          | Width of component (px)                                                                                    | number                                        |          | 700                 |
-| height         | Height of component (px)                                                                                   | number                                        |          | 600                 |
-| fontSizeMapper | Map each element of data to font size (px)                                                                 | Function: (word: string, idx: number): number |          | word => word.value; |
-| rotate         | Map each element of data to font rotation degree. Or simply provide a number for global rotation. (degree) | Function \| number                            |          | 0                   |
-| padding        | Map each element of data to font padding. Or simply provide a number for global padding. (px)              | Function \| number                            |          | 5                   |
-| font           | The font of text shown                                                                                     | Function \| string                            |          | serif               |
-| fontWeight | Weight of the font | string \| number |          |  'normal' |
-| autoFill       | Whether texts should be fill with random color or not                                                      | boolean                                       |          | false               |
-| fillMapper | Function used by autoFill to map each data item to a fill color. Can be used to customize the way autoFill generate colors | Function: (word: Word, index: number): string |          | A function based on schemeCategory10 of d3-scale-chromatic|
-| animations | Whether animated transitions is active or not | boolean |          |  false |
+| Name           | Description                                                                                        | Type                                                            | Required | Default             |
+|----------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|----------|---------------------|
+| data           | The input data for rendering                                                                       | AngularD3Word[]                                                 |     ✓    |                     |
+| width          | Width of component (px)                                                                            | number                                                          |          | 700                 |
+| height         | Height of component (px)                                                                           | number                                                          |          | 600                 |
+| padding        | Map each element of data to font padding. Or simply provide a number for global padding. (px)      | number                                                          |          | 5                   |
+| font           | The font of text shown                                                                             | string                                                          |          | Arial               |
+| fontSizeMapper | Map each element of data to font size (px)                                                         | number or ((word: AngularD3Word, index: number) => number)      |          | word => word.value  |
+| rotate         | Map each element of data to font rotation degree.                                                  | number or ((word: AngularD3Word, index: number) => number)      |          | 0                   |
+|                | Or simply provide a number for global rotation. (degree)                                           |                                                                 |          |                     |
+| autoFill       | Whether texts should be fill with random color or not                                              | boolean                                                         |          | false               |
+| fillMapper     | Function used by autoFill to map each data item to a fill color.                                   | (word: AngularD3Word, index: number) => string                  |          | function based on   |
+|                |                                                                                                    |                                                                 |          | schemeCategory10    |
+| animations     | Whether animated transitions is active or not                                                      | boolean                                                         |          | false               |
+| speed          | Animation speed (ms)                                                                               | number                                                          |          | 600                 |
+| fontWeight     | Weight of the font                                                                                 | string or number                                                |          | normal              |
+| fontStyle      | Style of the font                                                                                  | string                                                          |          | normal              |
+
 # Events
-| Name          | Description                                              | Payload                           |
-|---------------|----------------------------------------------------------|-----------------------------------|
-| wordClick     | Event triggered when click event triggered on a word     | { event: MouseEvent, word: Word } |
-| wordMouseOver | Event triggered when mouseover event triggered on a word | { event: MouseEvent, word: Word } |
-| wordMouseOut  | Event triggered when mouseout event triggered on a word  | { event: MouseEvent, word: Word } |
+| Name          | Description                                                                                         | Payload                                                         |
+|---------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| wordClick     | Event triggered when click event triggered on a word                                                | { event: MouseEvent, word: AngularD3Word }                      |
+| wordMouseOver | Event triggered when mouseover event triggered on a word                                            | { event: MouseEvent, word: AngularD3Word }                      |
+| wordMouseOut  | Event triggered when mouseout event triggered on a word                                             | { event: MouseEvent, word: AngularD3Word }                      |
 
 > The `Word` interface imported from `d3-cloud`
 # Example

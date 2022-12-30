@@ -18,6 +18,13 @@ D3 Cloud component for Angular built upon d3-cloud
 ```
 npm install --save @talentia/angular-d3-cloud@1.4.2
 ```
+Installing the package does not install the type definitions for d3-cloud, d3-scale, d3-scale-chromatic, d3-selection and d3-transition libraries.
+If you need to use these libraries in your project then install the type definitions with the following command:
+
+```
+npm i --save-dev @types/d3-cloud@1.2.5 @types/d3-scale@4.0.2 @types/d3-scale-chromatic@3.0.0 @types/d3-selection@3.0.3 @types/d3-transition@3.0.2
+```
+
 # Usage
 First import the package to your app module
 ```ts
@@ -42,72 +49,7 @@ Now the component is ready to use.
 export class AppComponent implements OnInit {
    @Input() data!: AngularD3Word[];
 
-   private words = [
-    "Exercitation",
-    "duis",
-    "ex",
-    "laboris",
-    "est",
-    "aliqua",
-    "Lorem",
-    "veniam",
-    "ad",
-    "Minim",
-    "enim",
-    "do",
-    "exercitation",
-    "eiusmod",
-    "sunt",
-    "qui",
-    "Aliqua",
-    "velit",
-    "in",
-    "commodo",
-    "anim",
-    "Sunt",
-    "labore",
-    "dolor",
-    "non",
-    "culpa",
-    "proident",
-    "laborum",
-    "dolore",
-    "occaecat",
-    "mollit",
-    "ea",
-    "aute",
-    "excepteur",
-    "Labore",
-    "incididunt",
-    "tempor",
-    "Nisi",
-    "nostrud",
-    "deserunt",
-    "ipsum",
-    "adipisicing",
-    "pariatur",
-    "magna",
-    "Ut",
-    "aliquip",
-    "et",
-    "Pariatur",
-    "sint",
-    "ut",
-    "amet",
-    "id",
-    "eu",
-    "cillum",
-    "nulla",
-    "esse",
-    "elit",
-    "consequat",
-    "Ea",
-    "ullamco",
-    "Ad",
-    "voluptate",
-    "nisi",
-    "minim"
-  ];
+     private words = ["Exercitation","duis","ex","laboris","est","aliqua","Lorem","veniam","ad","Minim","enim","do","exercitation","eiusmod","sunt","qui","Aliqua","velit","in","commodo","anim","Sunt","labore","dolor","non","culpa","proident","laborum","dolore","occaecat","mollit","ea","aute","excepteur","Labore","incididunt","tempor","Nisi","nostrud","deserunt","ipsum","adipisicing","pariatur","magna","Ut","aliquip","et","Pariatur","sint","ut","amet","id","eu","cillum","nulla","esse","elit","consequat","Ea","ullamco","Ad","voluptate","nisi","minim"];
 
    ngOnInit(): void {
     this.data = this.words.map((word) => {

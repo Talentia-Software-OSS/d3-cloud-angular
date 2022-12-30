@@ -2,10 +2,7 @@
   "name": "@talentia/angular-d3-cloud",
   "title": "Angular D3 Word Cloud",
   "description": "D3 word cloud component for Angular built upon d3-cloud",
-  "version": "1.4.2",   
-  "devDependencies": {
-    "@types/d3-cloud": "^1.2.3"
-  },
+  "version": "1.4.2",
   "dependencies": {
     "d3-cloud": "^1.2.5",
     "d3-scale": "^4.0.2",
@@ -15,7 +12,12 @@
   },
   "peerDependencies": {
     "@angular/common": "^15.0.1",
-    "@angular/core": "^15.0.1"
+    "@angular/core": "^15.0.1",
+    "@types/d3-cloud": "^1.2.5",
+    "@types/d3-scale": "^4.0.2",
+    "@types/d3-scale-chromatic": "^3.0.0",
+    "@types/d3-selection": "^3.0.3",
+    "@types/d3-transition": "^3.0.2"
   },
   "schematics": "./schematics/collection.json",
   "author": {

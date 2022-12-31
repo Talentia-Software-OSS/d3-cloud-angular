@@ -1,6 +1,8 @@
 # Angular D3 Word Cloud
 D3 Cloud component for Angular built upon d3-cloud
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/edit/d3-cloud-angular)
+
 ## This version require Angular CLI 15
 
 ## Previous versions

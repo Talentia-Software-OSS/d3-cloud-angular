@@ -86,7 +86,7 @@ export class AppComponent implements OnInit {
 | wordMouseOver | Event triggered when mouseover event triggered on a word                                            | { event: MouseEvent, word: AngularD3Word }                      |
 | wordMouseOut  | Event triggered when mouseout event triggered on a word                                             | { event: MouseEvent, word: AngularD3Word }                      |
 
-> The `Word` interface imported from `d3-cloud`
+> `AngularD3Word` extends the interface `Word` imported from `d3-cloud`
 # Example
 Run the following commands to start sample project:
 ```

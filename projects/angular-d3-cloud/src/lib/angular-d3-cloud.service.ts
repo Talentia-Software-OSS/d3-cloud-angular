@@ -13,15 +13,17 @@ export class AngularD3CloudService {
 
   private ngZone: NgZone;
   private document: Document;
-  public wordMouseClick:Subject<{ event: MouseEvent, word: AngularD3Word }>; 
-  public wordMouseOver:Subject<{ event: MouseEvent, word: AngularD3Word }>; 
-  public wordMouseOut:Subject<{ event: MouseEvent, word: AngularD3Word }>; 
+  public wordMouseClick: Subject<{ event: MouseEvent, word: AngularD3Word }>; 
+  public wordMouseOver: Subject<{ event: MouseEvent, word: AngularD3Word }>; 
+  public wordMouseMove: Subject<{ event: MouseEvent, word: AngularD3Word }>; 
+  public wordMouseOut: Subject<{ event: MouseEvent, word: AngularD3Word }>; 
 
   constructor() {
     this.ngZone = inject(NgZone);
     this.document = inject(DOCUMENT);
     this.wordMouseClick = new Subject<{ event: MouseEvent, word: AngularD3Word }>(); 
     this.wordMouseOver = new Subject<{ event: MouseEvent, word: AngularD3Word }>(); 
+    this.wordMouseMove = new Subject<{ event: MouseEvent, word: AngularD3Word }>(); 
     this.wordMouseOut = new Subject<{ event: MouseEvent, word: AngularD3Word }>();     
   }
 
@@ -69,13 +71,16 @@ export class AngularD3CloudService {
             .style('font-style', options.fontStyle)
             .style('font-weight', options.fontWeight)
             .style('font-size', data => `${data.size}px`)
+            .style('user-select', 'none')
             .style('fill', (word, index) => this.applyFill(options, word, index))
-            .attr('text-anchor', 'middle')
+            .attr('text-anchor', 'middle')            
             .text((data) => data.text);
+
+          this.applyTooltip(options, texts);
 
           this.applyAnimation(options, texts);   
           
-          this.applyEventListeners(options, texts);        
+          this.applyEventListeners(options, texts);          
         });
   
         layout.start();      
@@ -110,7 +115,7 @@ export class AngularD3CloudService {
       // Initial status
       texts
         .style('font-size', 1)
-        .style("fill-opacity", 1e-6);
+        .style('fill-opacity', 1e-6);
 
       //Entering and existing words
       texts
@@ -118,28 +123,65 @@ export class AngularD3CloudService {
         .duration(options.speed)
         .attr('transform', (data: AngularD3Word) => `translate(${[data.x, data.y]})rotate(${data.rotate})`)
         .style('font-size', (data: AngularD3Word) => `${data.size}px`)
-        .style("fill-opacity", 1);
+        .style('fill-opacity', 1);
     }
   }
 
   private applyEventListeners(options: AngularD3CloudOptions, texts: Selection<SVGTextElement, AngularD3Word, SVGGElement, unknown>): void {
-    if(options.mouseClickObserved) {
-      texts.on('click', (event: MouseEvent, word: AngularD3Word) => {
-        this.wordMouseClick.next({ event, word });          
-      });
-    }        
-    
-    if(options.mouseOverObserved) {
-      texts.on('mouseover', (event: MouseEvent, word: AngularD3Word) => {
-        this.wordMouseOver.next({ event, word });        
-      });
-    }        
+    const _this = this;
 
-    if(options.mouseOutObserved) {
-      texts.on('mouseout', (event: MouseEvent, word: AngularD3Word) => {
-        this.wordMouseOut.next({ event, word });
+    texts.on('click', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
+      if(options.selection) {
+        const text = select(this);
+        const selected = text.classed('word-selected');
+        if(selected) {
+          text.style('fill-opacity', 1.0).classed('word-selected', false);
+        } else {
+          texts.filter(function(this: SVGTextElement) { return select(this).classed('word-selected') }).style('fill-opacity', 1.0).classed('word-selected', false);
+          text.style('fill-opacity', 0.5).classed('word-selected', true);
+        }     
+      }       
+      if(options.mouseClickObserved) {     
+        _this.wordMouseClick.next({ event, word });
+      }                
+    });   
+
+    texts.on('mouseover', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
+      if(options.hover) {
+        select(this).style('fill-opacity', 0.5);
+      }
+      if(options.mouseOverObserved) {
+        _this.wordMouseOver.next({ event, word });
+      }              
+    });   
+    
+    texts.on('mousemove', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
+      if(options.mouseMoveObserved) {
+        _this.wordMouseMove.next({ event, word }); 
+      }             
+    });
+
+    texts.on('mouseout', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
+      const text = select(this);
+      let selected = false;
+      if(options.selection) {
+        selected = text.classed('word-selected');
+      }
+      if(options.hover && !selected) {        
+        text.style('fill-opacity', 1.0);
+      } 
+      if(options.mouseOutObserved) {
+        _this.wordMouseOut.next({ event, word });
+      } 
+    });
+  }
+
+  private applyTooltip(options: AngularD3CloudOptions, texts: Selection<SVGTextElement, AngularD3Word, SVGGElement, unknown>): void {
+    if(options.tooltip) {
+      texts.append('title').text((data) => {
+        return data.tooltip || data.text;
       });
-    }   
+    }
   }
 
   private validateData(node: Element | null, options: AngularD3CloudOptions): TypeError[] | null {
@@ -159,6 +201,9 @@ export class AngularD3CloudService {
     this.validateFontStyle(validated, options); 
     this.validateAnimations(validated, options); 
     this.validateSpeed(validated, options); 
+    this.validateTooltip(validated, options); 
+    this.validateHover(validated, options); 
+    this.validateSelection(validated, options); 
 
     if(validated.length > 0) {
       return validated;
@@ -261,6 +306,27 @@ export class AngularD3CloudService {
   private validateFontStyle(validated: TypeError[], options: AngularD3CloudOptions): void {
     if (options.fontStyle === null || options.fontStyle === undefined || typeof options.fontStyle !== 'string') {
       const error = new TypeError(`${AngularD3CloudService.TAG}: [fontStyle] must be a string. Current value is: [${options.fontStyle}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateTooltip(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.tooltip === null || options.tooltip === undefined || typeof options.tooltip !== 'boolean') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [tooltip] must be boolean. Current value is: [${options.tooltip}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateHover(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.hover === null || options.hover === undefined || typeof options.hover !== 'boolean') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [hover] must be boolean. Current value is: [${options.hover}]`);
+      validated.push(error);
+    }
+  }
+
+  private validateSelection(validated: TypeError[], options: AngularD3CloudOptions): void {
+    if (options.selection === null || options.selection === undefined || typeof options.selection !== 'boolean') {
+      const error = new TypeError(`${AngularD3CloudService.TAG}: [selection] must be boolean. Current value is: [${options.selection}]`);
       validated.push(error);
     }
   }

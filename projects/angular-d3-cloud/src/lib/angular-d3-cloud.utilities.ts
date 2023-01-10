@@ -66,7 +66,11 @@ export const defaultOptions: AngularD3CloudOptions = {
   speed: 600,
   fontWeight: 'normal',
   fontStyle: 'normal',
+  tooltip: false,
+  hover: false,
+  selection: false,
   mouseClickObserved: false,
   mouseOverObserved: false,
+  mouseMoveObserved: false,
   mouseOutObserved: false
 };

@@ -24,29 +24,37 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
   @Input() speed: number = defaultOptions.speed;
   @Input() fontWeight: string | number = defaultOptions.fontWeight;
   @Input() fontStyle: string = defaultOptions.fontStyle;
+  @Input() tooltip: boolean = defaultOptions.tooltip;
+  @Input() hover: boolean = defaultOptions.hover;
+  @Input() selection: boolean = defaultOptions.selection;
 
   @Output() wordClick = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOver = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
+  @Output() wordMouseMove = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOut = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
 
   private cloudService: AngularD3CloudService;
   private options: AngularD3CloudOptions;
   private wordMouseClickSubscriber: Subscription;
   private wordMouseOverSubscriber: Subscription;
+  private wordMouseMoveSubscriber: Subscription;
   private wordMouseOutSubscriber: Subscription;
 
   constructor() { 
     this.cloudService = inject(AngularD3CloudService);
     this.options = this.createOptions();
 
-    this.wordMouseClickSubscriber = this.cloudService.wordMouseClick.subscribe((data) => {
-      this.wordClick.emit(data);
+    this.wordMouseClickSubscriber = this.cloudService.wordMouseClick.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
+      this.wordClick.emit(value);
     });   
-    this.wordMouseOverSubscriber = this.cloudService.wordMouseOver.subscribe((data) => {
-      this.wordMouseOver.emit(data);
+    this.wordMouseOverSubscriber = this.cloudService.wordMouseOver.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
+      this.wordMouseOver.emit(value);
     });
-    this.wordMouseOutSubscriber = this.cloudService.wordMouseOut.subscribe((data) => {
-      this.wordMouseOut.emit(data);
+    this.wordMouseMoveSubscriber = this.cloudService.wordMouseMove.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
+      this.wordMouseMove.emit(value);
+    });
+    this.wordMouseOutSubscriber = this.cloudService.wordMouseOut.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
+      this.wordMouseOut.emit(value);
     });
   }
 
@@ -67,6 +75,10 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     
     if(this.wordMouseOverSubscriber) {
       this.wordMouseOverSubscriber.unsubscribe();
+    } 
+
+    if(this.wordMouseMoveSubscriber) {
+      this.wordMouseMoveSubscriber.unsubscribe();
     } 
 
     if(this.wordMouseOutSubscriber) {
@@ -99,8 +111,12 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
       speed: this.speed,
       fontWeight: this.fontWeight,
       fontStyle: this.fontStyle,
+      tooltip: this.tooltip,
+      hover: this.hover,
+      selection: this.selection,
       mouseClickObserved: this.wordClick.observed,
       mouseOverObserved: this.wordMouseOver.observed,
+      mouseMoveObserved: this.wordMouseMove.observed,
       mouseOutObserved: this.wordMouseOut.observed
     };
   }
@@ -119,8 +135,12 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     this.options.speed = this.speed;
     this.options.fontWeight = this.fontWeight;
     this.options.fontStyle = this.fontStyle;
+    this.options.tooltip = this.tooltip;
+    this.options.hover = this.hover;
+    this.options.selection = this.selection;
     this.options.mouseClickObserved = this.wordClick.observed;
     this.options.mouseOverObserved = this.wordMouseOver.observed;
+    this.options.mouseMoveObserved = this.wordMouseMove.observed;
     this.options.mouseOutObserved = this.wordMouseOut.observed;   
     
     return this.options;

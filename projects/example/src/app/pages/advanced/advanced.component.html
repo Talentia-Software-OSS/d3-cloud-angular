@@ -3,7 +3,27 @@
         <div class="col-md-12">            
             <p class="lead mt-3">Change the options to apply and reload</p>
             <hr class="my-4">
-            <form class="row row-cols-lg-auto g-3 align-items-center">                
+            <form class="row row-cols-lg-auto g-3 align-items-center">   
+                <div class="col-12">
+                  <div class="form-check">
+                    <input [(ngModel)]="tooltip" [ngModelOptions]="{standalone: true}" [checked]="tooltip" class="form-check-input" type="checkbox" id="tooltipFormCheck">
+                    <label class="form-check-label" for="tooltipFormCheck">Tooltip</label>
+                  </div>
+                </div>  
+                
+                <div class="col-12">
+                  <div class="form-check">
+                    <input [(ngModel)]="hover" [ngModelOptions]="{standalone: true}" [checked]="hover" class="form-check-input" type="checkbox" id="hoverFormCheck">
+                    <label class="form-check-label" for="hoverFormCheck">Hover Effect</label>
+                  </div>
+                </div> 
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input [(ngModel)]="selection" [ngModelOptions]="{standalone: true}" [checked]="selection" class="form-check-input" type="checkbox" id="selectionFormCheck">
+                    <label class="form-check-label" for="selectionFormCheck">Selectable</label>
+                  </div>
+                </div> 
 
                 <div class="col-12">
                   <div class="form-check">
@@ -113,7 +133,13 @@
                   [fillMapper]="fillMapper"
                   [animations]="animations"
                   [speed]="speed"
-                  (wordClick)="onWordClick($event)">
+                  [tooltip]="tooltip"
+                  [hover]="hover"
+                  [selection]="selection"
+                  (wordClick)="onWordClick($event)"
+                  (wordMouseOver)="onWordMouseOver($event)"
+                  (wordMouseMove)="onWordMouseMove($event)"
+                  (wordMouseOut)="onWordMouseOut($event)">
                 </angular-d3-cloud>
             </p> 
         </div>

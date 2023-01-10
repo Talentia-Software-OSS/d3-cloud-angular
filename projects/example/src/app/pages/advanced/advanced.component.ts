@@ -47,6 +47,9 @@ export class AdvancedComponent implements OnInit {
   public weight: number = 400;
   public style: string = "normal";
   public padding: number = 5;
+  public tooltip: boolean = true;
+  public hover: boolean = true;
+  public selection: boolean = true;
 
   private _rotation: boolean = true;
   public get rotation(): boolean {
@@ -71,14 +74,27 @@ export class AdvancedComponent implements OnInit {
 
   ngOnInit(): void {   
     this.data = this.words.map((word) => {
-      return { text: word, value: 10 + Math.random() * 90 } as AngularD3Word;
+      const value = 10 + Math.random() * 90;
+      return { text: word, value: value, tooltip: `The value of ${word} is ${value}` } as AngularD3Word;
     });
     this.applyRotation();
     this.applyFillMapper();
   } 
 
   onWordClick(data: { event: MouseEvent, word: AngularD3Word }): void {
-    console.log(data.event?.type, data.word);
+    console.log(data.event?.type, data.event, data.word);
+  }
+
+  onWordMouseOver(data: { event: MouseEvent, word: AngularD3Word }): void {
+    console.log(data.event?.type, data.event, data.word);
+  }
+
+  onWordMouseMove(data: { event: MouseEvent, word: AngularD3Word }): void {
+    console.log(data.event?.type, data.event, data.word);
+  }
+
+  onWordMouseOut(data: { event: MouseEvent, word: AngularD3Word }): void {
+    console.log(data.event?.type, data.event, data.word);
   }
 
   private applyRotation(): void {

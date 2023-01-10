@@ -18,7 +18,7 @@ D3 Cloud component for Angular built upon d3-cloud
 
 # Installation
 ```
-npm install --save @talentia/angular-d3-cloud@1.4.3
+npm install --save @talentia/angular-d3-cloud@1.4.4
 ```
 Installing the package does not install the type definitions for d3-cloud, d3-scale, d3-scale-chromatic, d3-selection and d3-transition libraries.
 If you need to use these libraries in your project then install the type definitions with the following command:
@@ -44,7 +44,7 @@ Now the component is ready to use.
 
 ```html
 <!-- app.component.html -->
-<angular-d3-cloud [data]="data"></angular-d3-cloud>
+<angular-d3-cloud [data]="data" [hover]="true" [selection]="true" [tooltip]="true"></angular-d3-cloud>
 ```
 ```ts
 // app.component.ts
@@ -55,43 +55,54 @@ export class AppComponent implements OnInit {
 
    ngOnInit(): void {
     this.data = this.words.map((word) => {
-      return { text: word, value: 10 + Math.random() * 90 } as AngularD3Word;
+      const value = 10 + Math.random() * 90;
+      return { text: word, value: value, tooltip: `The value of ${word} is ${value}` } as AngularD3Word;
     });
   } 
 }
 ```
-# Props
+# AngularD3CloudComponent Properties
 | Name           | Description                                                                                        | Type                                                            | Required | Default             |
 |----------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|----------|---------------------|
-| data           | The input data for rendering                                                                       | AngularD3Word[]                                                 |     ✓    |                     |
-| width          | Width of component (px)                                                                            | number                                                          |          | 700                 |
-| height         | Height of component (px)                                                                           | number                                                          |          | 600                 |
-| padding        | Map each element of data to font padding. Or simply provide a number for global padding. (px)      | number                                                          |          | 5                   |
-| font           | The font of text shown                                                                             | string                                                          |          | Arial               |
-| fontSizeMapper | Map each element of data to font size (px)                                                         | number or ((word: AngularD3Word, index: number) => number)      |          | word => word.value  |
-| rotate         | Map each element of data to font rotation degree.                                                  | number or ((word: AngularD3Word, index: number) => number)      |          | 0                   |
-|                | Or simply provide a number for global rotation. (degree)                                           |                                                                 |          |                     |
-| autoFill       | Whether texts should be fill with random color or not                                              | boolean                                                         |          | false               |
-| fillMapper     | Function used by autoFill to map each data item to a fill color.                                   | (word: AngularD3Word, index: number) => string                  |          | function based on   |
-|                |                                                                                                    |                                                                 |          | schemeCategory10    |
-| animations     | Whether animated transitions is active or not                                                      | boolean                                                         |          | false               |
+| data           | Words array                                                                                        | AngularD3Word[]                                                 |     ✓    |                     |
+| width          | Layout width (px)                                                                                  | number                                                          |          | 700                 |
+| height         | Layout height (px)                                                                                 | number                                                          |          | 600                 |
+| padding        | Padding between tags (px)                                                                          | number                                                          |          | 5                   |
+| font           | Font family needed for calculating layout                                                          | string                                                          |          | Arial               |
+| fontSizeMapper | Map each word value of data to font size (px)                                                      | number | ((word: AngularD3Word, index: number) => number)       |          | word => word.value  |
+| rotate         | Rotation in degrees                                                                                | number | ((word: AngularD3Word, index: number) => number)       |          | 0                   |
+| autoFill       | Whether words need to be filled with random colors                                                 | boolean                                                         |          | false               |
+| fillMapper     | Function used by autoFill to map each data item to a fill color                                    | (word: AngularD3Word, index: number) => string                  |          | schemeCategory10    |
+| animations     | Whether to apply animation                                                                         | boolean                                                         |          | false               |
 | speed          | Animation speed (ms)                                                                               | number                                                          |          | 600                 |
-| fontWeight     | Weight of the font                                                                                 | string or number                                                |          | normal              |
-| fontStyle      | Style of the font                                                                                  | string                                                          |          | normal              |
+| fontWeight     | Font weight                                                                                        | string | number                                                 |          | normal              |
+| fontStyle      | Font style                                                                                         | string                                                          |          | normal              |
+| tooltip        | Whether the tooltip should be shown                                                                | boolean                                                         |          | false               |
+| hover          | Whether to apply the hover effect on the words                                                     | boolean                                                         |          | false               |
+| selection      | Whether the word should be selectable                                                              | boolean                                                         |          | false               |
 
-# Events
+# AngularD3CloudComponent Events
 | Name          | Description                                                                                         | Payload                                                         |
 |---------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
 | wordClick     | Event triggered when click event triggered on a word                                                | { event: MouseEvent, word: AngularD3Word }                      |
 | wordMouseOver | Event triggered when mouseover event triggered on a word                                            | { event: MouseEvent, word: AngularD3Word }                      |
+| wordMouseMove | Event triggered when mousemove event triggered on a word                                            | { event: MouseEvent, word: AngularD3Word }                      |
 | wordMouseOut  | Event triggered when mouseout event triggered on a word                                             | { event: MouseEvent, word: AngularD3Word }                      |
 
+# AngularD3Word Interface
+| Name          | Description                                                                                         | Type                                                            |
+|---------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| value         | Value to map to font size                                                                           | number                                                          |
+| tooltip       | Tooltip text                                                                                        | string                                                          |
+
 > `AngularD3Word` extends the interface `Word` imported from `d3-cloud`
+
 # Example
 Run the following commands to start sample project:
 ```
 npm start
 ```
+
 # Thanks
 This project is built with the idea of [React D3 Cloud](https://github.com/Yoctol/react-d3-cloud).  
 This project is forked from [maitrungduc1410/d3-cloud-angular](https://github.com/maitrungduc1410/d3-cloud-angular).

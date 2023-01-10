@@ -15,7 +15,8 @@ export class SimpleComponent implements OnInit {
 
   ngOnInit(): void {
     this.data = this.words.map((word) => {
-      return { text: word, value: 10 + Math.random() * 90 } as AngularD3Word;
+      const value = 10 + Math.random() * 90;
+      return { text: word, value: value, tooltip: `The value of ${word} is ${value}` } as AngularD3Word;
     });
   } 
 }

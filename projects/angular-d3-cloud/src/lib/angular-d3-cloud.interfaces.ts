@@ -1,6 +1,5 @@
 export interface AngularD3Word {
   text: string;
-  value: number;  
   font: string;
   style: string;
   weight: string | number;
@@ -9,7 +8,8 @@ export interface AngularD3Word {
   padding: number;
   x: number;
   y: number;
-  hasText: boolean;
+  value: number;   
+  tooltip: string;
 }
 
 export interface AngularD3CloudOptions {
@@ -26,7 +26,11 @@ export interface AngularD3CloudOptions {
   speed: number;
   fontWeight: string | number;
   fontStyle: string;
+  tooltip: boolean;
+  hover: boolean;
+  selection: boolean;
   mouseClickObserved: boolean;
   mouseOverObserved: boolean;
+  mouseMoveObserved: boolean;
   mouseOutObserved: boolean;
 }

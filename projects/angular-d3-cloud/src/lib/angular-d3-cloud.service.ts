@@ -2,7 +2,7 @@ import { inject, Injectable, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Subject } from 'rxjs';
 import cloud from 'd3-cloud'
-import { select, selectAll, Selection } from 'd3-selection';
+import { select, Selection } from 'd3-selection';
 import 'd3-transition';
 import { AngularD3CloudOptions, AngularD3Word } from './angular-d3-cloud.interfaces';
 import { defaultFillMapper, defaultOptions } from './angular-d3-cloud.utilities';

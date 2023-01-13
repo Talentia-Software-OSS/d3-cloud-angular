@@ -69,6 +69,7 @@ export const defaultOptions: AngularD3CloudOptions = {
   tooltip: false,
   hover: false,
   selection: false,
+  theme: 'text-opacity',
   mouseClickObserved: false,
   mouseOverObserved: false,
   mouseMoveObserved: false,

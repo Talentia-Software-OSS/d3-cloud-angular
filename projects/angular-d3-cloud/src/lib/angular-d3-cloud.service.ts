@@ -41,6 +41,12 @@ export class AngularD3CloudService {
   private render(node: Element, options: AngularD3CloudOptions): void {
     this.ngZone.runOutsideAngular(() => {
 
+      let ngcontent: string;
+      const attributes = node.getAttributeNames();
+      if(attributes) {
+        ngcontent = attributes.find((value: string) => value.startsWith('_ngcontent-')) as string;
+      }      
+
       select(node).selectAll('*').remove();
   
       const layout = cloud<AngularD3Word>()
@@ -61,8 +67,11 @@ export class AngularD3CloudService {
             .attr('height', h)
             .attr('viewBox', `0 0 ${w} ${h}`)
             .attr('preserveAspectRatio', 'xMinYMin meet')
-            .append('g')   
-            .attr('transform', `translate(${w / 2},${h / 2})`)          
+            .attr(ngcontent, '')
+            .classed(options.theme, true)
+            .append('g')
+            .attr('transform', `translate(${w / 2},${h / 2})`)
+            .attr(ngcontent, '')
             .selectAll('text')
             .data(words)
             .enter()
@@ -71,9 +80,9 @@ export class AngularD3CloudService {
             .style('font-style', options.fontStyle)
             .style('font-weight', options.fontWeight)
             .style('font-size', data => `${data.size}px`)
-            .style('user-select', 'none')
             .style('fill', (word, index) => this.applyFill(options, word, index))
-            .attr('text-anchor', 'middle')            
+            .attr('text-anchor', 'middle')     
+            .attr(ngcontent, '')
             .text((data) => data.text);
 
           this.applyTooltip(options, texts);
@@ -93,15 +102,9 @@ export class AngularD3CloudService {
     return canvas;
   }
 
-  private applyFill(options: AngularD3CloudOptions, word: AngularD3Word, index: number): string | null {
-    if (options.autoFill) {
-      if(options.fillMapper) {
-        return options.fillMapper(word, index);
-      } else {
-        return defaultFillMapper(word, index);
-      }
-    } else {
-      return null;
+  private applyTooltip(options: AngularD3CloudOptions, texts: Selection<SVGTextElement, AngularD3Word, SVGGElement, unknown>): void {
+    if(options.tooltip) {
+      texts.append('title').text((data) => data.tooltip || data.text);
     }
   }
 
@@ -129,27 +132,37 @@ export class AngularD3CloudService {
 
   private applyEventListeners(options: AngularD3CloudOptions, texts: Selection<SVGTextElement, AngularD3Word, SVGGElement, unknown>): void {
     const _this = this;
+    const applyCursorHover = (options.tooltip || options.hover || options.selection);
 
     texts.on('click', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
-      if(options.selection) {
-        const text = select(this);
-        const selected = text.classed('word-selected');
+      const text = select(this);
+
+      if(options.selection) {        
+        const selected = text.classed('text--selected');
         if(selected) {
-          text.style('fill-opacity', 1.0).classed('word-selected', false);
+          text.classed('text--selected', false);
         } else {
-          texts.filter(function(this: SVGTextElement) { return select(this).classed('word-selected') }).style('fill-opacity', 1.0).classed('word-selected', false);
-          text.style('fill-opacity', 0.5).classed('word-selected', true);
-        }     
-      }       
+          texts.filter(function(this: SVGTextElement) { return select(this).classed('text--selected'); }).classed('text--selected', false);       
+          text.classed('text--selected', true);
+        }
+      }
+       
       if(options.mouseClickObserved) {     
         _this.wordMouseClick.next({ event, word });
       }                
     });   
 
     texts.on('mouseover', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
-      if(options.hover) {
-        select(this).style('fill-opacity', 0.5);
+      const text = select(this);
+
+      if(applyCursorHover) {
+        text.classed('cursor--hover', true);
       }
+
+      if(options.hover) {
+        text.classed('text--hover', true);
+      }
+      
       if(options.mouseOverObserved) {
         _this.wordMouseOver.next({ event, word });
       }              
@@ -163,24 +176,30 @@ export class AngularD3CloudService {
 
     texts.on('mouseout', function(this: SVGTextElement, event: MouseEvent, word: AngularD3Word) {
       const text = select(this);
-      let selected = false;
-      if(options.selection) {
-        selected = text.classed('word-selected');
+
+      if(applyCursorHover) {
+        text.classed('cursor--hover', false);
       }
-      if(options.hover && !selected) {        
-        text.style('fill-opacity', 1.0);
+
+      if(options.hover) {        
+        text.classed('text--hover', false);
       } 
+
       if(options.mouseOutObserved) {
         _this.wordMouseOut.next({ event, word });
       } 
     });
   }
 
-  private applyTooltip(options: AngularD3CloudOptions, texts: Selection<SVGTextElement, AngularD3Word, SVGGElement, unknown>): void {
-    if(options.tooltip) {
-      texts.append('title').text((data) => {
-        return data.tooltip || data.text;
-      });
+  private applyFill(options: AngularD3CloudOptions, word: AngularD3Word, index: number): string | null {
+    if (options.autoFill) {
+      if(options.fillMapper) {
+        return options.fillMapper(word, index);
+      } else {
+        return defaultFillMapper(word, index);
+      }
+    } else {
+      return null;
     }
   }
 

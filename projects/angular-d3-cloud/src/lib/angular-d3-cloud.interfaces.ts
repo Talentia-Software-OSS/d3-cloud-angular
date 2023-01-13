@@ -29,8 +29,11 @@ export interface AngularD3CloudOptions {
   tooltip: boolean;
   hover: boolean;
   selection: boolean;
+  theme: AngularD3Themes;
   mouseClickObserved: boolean;
   mouseOverObserved: boolean;
   mouseMoveObserved: boolean;
   mouseOutObserved: boolean;
 }
+
+export type AngularD3Themes = 'text-opacity' | 'text-shadow';

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 import { FormsModule } from '@angular/forms';
 import { scaleLinear, scaleOrdinal } from 'd3-scale';
 import { schemeBlues, schemeCategory10, schemeGreens, schemePastel1, schemePastel2 } from 'd3-scale-chromatic';
-import { AngularD3CloudModule, AngularD3Word } from '@talentia/angular-d3-cloud';
+import { AngularD3CloudModule, AngularD3Word, AngularD3Themes } from '@talentia/angular-d3-cloud';
 
 @Component({
   selector: 'app-advanced',
@@ -37,6 +37,7 @@ export class AdvancedComponent implements OnInit {
   public styles: string[] = [ "normal", "italic"];
   public paddings: number[] = [0, 1, 2, 3, 4, 5];
   public speeds: number[] = [100, 300, 600, 1000];
+  public themes: string[] = [ "text-opacity", "text-shadow"];
 
   public rotate!: number | ((word: AngularD3Word, index: number) => number);
   public fillMapper!: (word: AngularD3Word, index: number) => string; 
@@ -50,6 +51,7 @@ export class AdvancedComponent implements OnInit {
   public tooltip: boolean = true;
   public hover: boolean = true;
   public selection: boolean = true;
+  public theme: AngularD3Themes = "text-opacity";
 
   private _rotation: boolean = true;
   public get rotation(): boolean {

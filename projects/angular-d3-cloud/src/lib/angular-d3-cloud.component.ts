@@ -1,12 +1,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, AfterViewInit, Output, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AngularD3CloudOptions, AngularD3Word } from './angular-d3-cloud.interfaces';
+import { AngularD3CloudOptions, AngularD3Word, AngularD3Themes } from './angular-d3-cloud.interfaces';
 import { AngularD3CloudService } from './angular-d3-cloud.service';
 import { clone, defaultOptions, hasChanges } from './angular-d3-cloud.utilities';
 
 @Component({
   selector: 'angular-d3-cloud',
-  templateUrl: './angular-d3-cloud.component.html'
+  templateUrl: './angular-d3-cloud.component.html',
+  styleUrls: ['./angular-d3-cloud.component.scss']
 })
 export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('wordcloud', { static: false }) wordcloud: ElementRef<HTMLDivElement> | undefined;
@@ -27,6 +28,7 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
   @Input() tooltip: boolean = defaultOptions.tooltip;
   @Input() hover: boolean = defaultOptions.hover;
   @Input() selection: boolean = defaultOptions.selection;
+  @Input() theme: AngularD3Themes = defaultOptions.theme;
 
   @Output() wordClick = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
   @Output() wordMouseOver = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
@@ -114,6 +116,7 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
       tooltip: this.tooltip,
       hover: this.hover,
       selection: this.selection,
+      theme: this.theme,
       mouseClickObserved: this.wordClick.observed,
       mouseOverObserved: this.wordMouseOver.observed,
       mouseMoveObserved: this.wordMouseMove.observed,
@@ -138,6 +141,7 @@ export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDest
     this.options.tooltip = this.tooltip;
     this.options.hover = this.hover;
     this.options.selection = this.selection;
+    this.options.theme = this.theme;
     this.options.mouseClickObserved = this.wordClick.observed;
     this.options.mouseOverObserved = this.wordMouseOver.observed;
     this.options.mouseMoveObserved = this.wordMouseMove.observed;

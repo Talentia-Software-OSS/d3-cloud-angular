@@ -107,13 +107,25 @@
                 </div>
 
                 <div class="col-12">
-                  <label class="sr-only visually-hidden" for="fontFormSelect">Font Style</label>
+                  <label class="sr-only visually-hidden" for="styleFormSelect">Font Style</label>
                   <div class="input-group mb-2">
                     <div class="input-group-prepend">
                       <div class="input-group-text">Font Style</div>
                     </div>
                     <select [(ngModel)]="style" [ngModelOptions]="{standalone: true}" class="form-select" id="styleFormSelect">
                       <option *ngFor="let item of styles" [value]="item">{{item}}</option>
+                    </select>
+                  </div>                    
+                </div>
+
+                <div class="col-12">
+                  <label class="sr-only visually-hidden" for="themeFormSelect">Theme</label>
+                  <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Theme</div>
+                    </div>
+                    <select [(ngModel)]="theme" [ngModelOptions]="{standalone: true}" [disabled]="!hover && !selection" class="form-select" id="themeFormSelect">
+                      <option *ngFor="let item of themes" [value]="item">{{item}}</option>
                     </select>
                   </div>                    
                 </div>
@@ -136,6 +148,7 @@
                   [tooltip]="tooltip"
                   [hover]="hover"
                   [selection]="selection"
+                  [theme]="theme"
                   (wordClick)="onWordClick($event)"
                   (wordMouseOver)="onWordMouseOver($event)"
                   (wordMouseMove)="onWordMouseMove($event)"

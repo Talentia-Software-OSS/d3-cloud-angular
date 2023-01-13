@@ -18,7 +18,7 @@ D3 Cloud component for Angular built upon d3-cloud
 
 # Installation
 ```
-npm install --save @talentia/angular-d3-cloud@1.4.4
+npm install --save @talentia/angular-d3-cloud@1.4.5
 ```
 Installing the package does not install the type definitions for d3-cloud, d3-scale, d3-scale-chromatic, d3-selection and d3-transition libraries.
 If you need to use these libraries in your project then install the type definitions with the following command:
@@ -80,6 +80,7 @@ export class AppComponent implements OnInit {
 | tooltip        | Whether the tooltip should be shown                                                                | boolean                                                         |          | false               |
 | hover          | Whether to apply the hover effect on the words                                                     | boolean                                                         |          | false               |
 | selection      | Whether the word should be selectable                                                              | boolean                                                         |          | false               |
+| theme          | Theme to apply on hover or selected words                                                          | AngularD3Themes                                                 |          | text-opacity        |
 
 # AngularD3CloudComponent Events
 | Name          | Description                                                                                         | Payload                                                         |
@@ -94,6 +95,12 @@ export class AppComponent implements OnInit {
 |---------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
 | value         | Value to map to font size                                                                           | number                                                          |
 | tooltip       | Tooltip text                                                                                        | string                                                          |
+
+# AngularD3Themes Type
+| Name          | Description                                                                                         | Type                                                            |
+|---------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| text-opacity  | Apply opacity effect on hover or selected words                                                     | string                                                          |
+| text-shadow   | Apply shadow effect on hover or selected words                                                      | string                                                          |
 
 > `AngularD3Word` extends the interface `Word` imported from `d3-cloud`
 

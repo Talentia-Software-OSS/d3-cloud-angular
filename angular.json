@@ -5,6 +5,11 @@
   "projects": {
     "@talentia/angular-d3-cloud": {
       "projectType": "library",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "root": "projects/angular-d3-cloud",
       "sourceRoot": "projects/angular-d3-cloud/src",
       "prefix": "lib",

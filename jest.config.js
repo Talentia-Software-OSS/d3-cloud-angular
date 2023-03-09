@@ -1,4 +1,4 @@
-const { defaults } = require('jest-preset-angular/presets');
+const { defaultTransformerOptions } = require('jest-preset-angular/presets');
 
 const esModules = [
   'd3-scale', 
@@ -37,7 +37,7 @@ module.exports = {
     '<rootDir>/dist/',
     '<rootDir>/node_modules/'
   ], 
-  cacheDirectory: '.jest-cache',
+  cache: false,
   resolver: 'jest-preset-angular/build/resolvers/ng-jest-resolver.js',
   transformIgnorePatterns: [`node_modules/(?!.*\\.mjs$|${esModules.join('|')})`],
   roots: [
@@ -46,11 +46,14 @@ module.exports = {
   moduleNameMapper: {
     '^@talentia/angular-d3-cloud$': '<rootDir>/dist/angular-d3-cloud'
   },
-  globals: {
-    'ts-jest': {
-      ...defaults.globals['ts-jest'],  
-      isolatedModules: true
-    }
+  transform: {
+    '^.+\\.(ts|js|mjs|html|svg)$': [
+      'jest-preset-angular',
+      {
+        ...defaultTransformerOptions,
+        isolatedModules: true,
+      }
+    ]
   },
   verbose: true,
   watchman: false,

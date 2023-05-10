@@ -18,7 +18,7 @@ D3 Cloud component for Angular built upon d3-cloud
 
 # Installation
 ```
-npm install --save @talentia/angular-d3-cloud@1.4.6
+npm install --save @talentia/angular-d3-cloud@1.4.7
 ```
 Installing the package does not install the type definitions for d3-cloud, d3-scale, d3-scale-chromatic, d3-selection and d3-transition libraries.
 If you need to use these libraries in your project then install the type definitions with the following command:

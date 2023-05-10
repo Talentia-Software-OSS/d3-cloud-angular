@@ -51,12 +51,10 @@ module.exports = {
       'jest-preset-angular',
       {
         ...defaultTransformerOptions,
-        isolatedModules: true,
+        isolatedModules: true
       }
     ]
   },
   verbose: true,
-  watchman: false,
-  resetModules: true,
-  restoreMocks: true
+  watchman: false
 };

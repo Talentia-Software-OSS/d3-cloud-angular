@@ -1,152 +1,257 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, AfterViewInit, Output, SimpleChanges, ViewChild, OnDestroy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { AngularD3CloudOptions, AngularD3Word, AngularD3Themes } from './angular-d3-cloud.interfaces';
-import { AngularD3CloudService } from './angular-d3-cloud.service';
-import { clone, defaultOptions, hasChanges } from './angular-d3-cloud.utilities';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild,
+} from '@angular/core';
+import * as cloud from 'd3-cloud';
+import { select } from 'd3-selection';
+import 'd3-transition';
 
+import { scaleOrdinal } from 'd3-scale';
+import { schemeCategory10 } from 'd3-scale-chromatic';
+import { AngularD3Word } from './interfaces';
+
+const fill = scaleOrdinal(schemeCategory10);
+const defaultFontSizeMapper: any = (word: AngularD3Word) => word.value;
 @Component({
   selector: 'angular-d3-cloud',
   templateUrl: './angular-d3-cloud.component.html',
-  styleUrls: ['./angular-d3-cloud.component.scss']
 })
-export class AngularD3CloudComponent implements OnChanges, AfterViewInit, OnDestroy {
-  @ViewChild('wordcloud', { static: false }) wordcloud: ElementRef<HTMLDivElement> | undefined;
+export class AngularD3CloudComponent implements OnChanges, OnInit {
+  @ViewChild('wordcloud') wordcloud: ElementRef<HTMLDivElement> | undefined;
+  @Input() data: cloud.Word[] = [];
+  @Input() width?: number = 700;
+  @Input() height?: number = 600;
+  @Input() padding?:
+    | number
+    | ((datum: cloud.Word, index: number) => number) = 5;
+  @Input() font?: string | ((datum: cloud.Word, index: number) => string) =
+    'serif';
+  @Input() fontSizeMapper?: (datum: cloud.Word, index: number) => number =
+    defaultFontSizeMapper;
+  @Input() rotate?: number | ((datum: cloud.Word, index: number) => number) = 0;
+  @Input() autoFill?: boolean = true;
+  @Input() fillMapper?: (datum: cloud.Word, index: number) => string;
+  @Input() animations?: boolean = false;
+  @Input() fontWeight: string | number = 'normal';
 
-  @Input() data: AngularD3Word[] = [];
-  @Input() width: number = defaultOptions.width;
-  @Input() height: number = defaultOptions.height;
-  @Input() padding: number = defaultOptions.padding;
-  @Input() font: string = defaultOptions.font;
-  @Input() fontSizeMapper: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.fontSizeMapper;
-  @Input() rotate: number | ((word: AngularD3Word, index: number) => number) = defaultOptions.rotate;
-  @Input() autoFill: boolean = defaultOptions.autoFill;
-  @Input() fillMapper: (word: AngularD3Word, index: number) => string = defaultOptions.fillMapper;
-  @Input() animations: boolean = defaultOptions.animations;
-  @Input() speed: number = defaultOptions.speed;
-  @Input() fontWeight: string | number = defaultOptions.fontWeight;
-  @Input() fontStyle: string = defaultOptions.fontStyle;
-  @Input() tooltip: boolean = defaultOptions.tooltip;
-  @Input() hover: boolean = defaultOptions.hover;
-  @Input() selection: boolean = defaultOptions.selection;
-  @Input() theme: AngularD3Themes = defaultOptions.theme;
+  @Output() wordClick = new EventEmitter<{
+    event: MouseEvent;
+    word: cloud.Word;
+  }>();
+  @Output() wordMouseOver = new EventEmitter<{
+    event: MouseEvent;
+    word: cloud.Word;
+  }>();
+  @Output() wordMouseOut = new EventEmitter<{
+    event: MouseEvent;
+    word: cloud.Word;
+  }>();
 
-  @Output() wordClick = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
-  @Output() wordMouseOver = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
-  @Output() wordMouseMove = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
-  @Output() wordMouseOut = new EventEmitter<{ event: MouseEvent, word: AngularD3Word }>();
+  private isMouseClickUsed = false;
+  private isMouseOverUsed = false;
+  private isMouseOutUsed = false;
+  private static TAG = '[AngularD3CloudComponent]';
 
-  private cloudService: AngularD3CloudService;
-  private options: AngularD3CloudOptions;
-  private wordMouseClickSubscriber: Subscription;
-  private wordMouseOverSubscriber: Subscription;
-  private wordMouseMoveSubscriber: Subscription;
-  private wordMouseOutSubscriber: Subscription;
-
-  constructor() { 
-    this.cloudService = inject(AngularD3CloudService);
-    this.options = this.createOptions();
-
-    this.wordMouseClickSubscriber = this.cloudService.wordMouseClick.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
-      this.wordClick.emit(value);
-    });   
-    this.wordMouseOverSubscriber = this.cloudService.wordMouseOver.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
-      this.wordMouseOver.emit(value);
-    });
-    this.wordMouseMoveSubscriber = this.cloudService.wordMouseMove.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
-      this.wordMouseMove.emit(value);
-    });
-    this.wordMouseOutSubscriber = this.cloudService.wordMouseOut.subscribe((value: { event: MouseEvent; word: AngularD3Word; }) => {
-      this.wordMouseOut.emit(value);
-    });
+  ngOnInit(): void {
+    this.isMouseClickUsed = this.wordClick.observers.length > 0;
+    this.isMouseOverUsed = this.wordMouseOver.observers.length > 0;
+    this.isMouseOutUsed = this.wordMouseOut.observers.length > 0;
   }
 
-  ngAfterViewInit(): void {
-    this.renderCloud(); 
+  ngAfterViewInit() {
+    this.renderCloud();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if(hasChanges(changes)) {
+  ngOnChanges(_changes: SimpleChanges): void {
+    if (this.wordcloud) {
       this.renderCloud();
-    }   
+    }
   }
 
-  ngOnDestroy(): void {
-    if(this.wordMouseClickSubscriber) {
-      this.wordMouseClickSubscriber.unsubscribe();
-    }  
-    
-    if(this.wordMouseOverSubscriber) {
-      this.wordMouseOverSubscriber.unsubscribe();
-    } 
+  renderCloud() {
+    this.validateProps();
 
-    if(this.wordMouseMoveSubscriber) {
-      this.wordMouseMoveSubscriber.unsubscribe();
-    } 
+    select(this.wordcloud?.nativeElement!).selectAll('*').remove();
 
-    if(this.wordMouseOutSubscriber) {
-      this.wordMouseOutSubscriber.unsubscribe();
-    } 
+    const _cloud = (cloud as any).default() as d3.layout.Cloud<cloud.Word>
+    const layout = _cloud
+      .size([this.width!, this.height!])
+      .font(this.font as any)
+      .fontWeight(this.fontWeight)
+      .words(this.data)
+      .padding(this.padding as any)
+      .rotate(this.rotate as any)
+      .fontSize(this.fontSizeMapper!)
+      .on('end', (words: any) => {
+        const texts = select(this.wordcloud?.nativeElement!)
+          .append('svg')
+          .attr('width', layout.size()[0])
+          .attr('height', layout.size()[1])
+          .append('g')
+          .attr(
+            'transform',
+            `translate(${layout.size()[0] / 2},${layout.size()[1] / 2})`
+          )
+          .selectAll('text')
+          .data(words)
+          .enter()
+          .append('text')
+          .style('font-family', this.font as any)
+          .style('font-weight', this.fontWeight)
+          .style('fill', (word: any, i) => {
+            if (this.autoFill) {
+              if (this.fillMapper) return this.fillMapper(word, i);
+              else return fill(i.toString());
+            } else {
+              return null;
+            }
+          })
+          .attr('text-anchor', 'middle')
+          .text((d: any) => d.text);
+
+        if (!this.animations) {
+          texts
+            .attr(
+              'transform',
+              (d: any) => `translate(${[d.x, d.y]})rotate(${d.rotate})`
+            )
+            .style('font-size', (d: any) => `${d.size}px`)
+            .style('fill-opacity', 1);
+        } else {
+          // Initial status
+          texts.style('font-size', 1).style('fill-opacity', 1e-6);
+
+          //Entering and existing words
+          texts
+            .transition()
+            .duration(600)
+            .attr(
+              'transform',
+              (d: any) => `translate(${[d.x, d.y]})rotate(${d.rotate})`
+            )
+            .style('font-size', (d: any) => `${d.size}px`)
+            .style('fill-opacity', 1);
+        }
+
+        if (this.isMouseClickUsed) {
+          texts.on('click', (event: MouseEvent, word: any) => {
+            this.wordClick.emit({ event, word });
+          });
+        }
+        if (this.isMouseOverUsed) {
+          texts.on('mouseover', (event: MouseEvent, word: any) => {
+            this.wordMouseOver.emit({ event, word });
+          });
+        }
+
+        if (this.isMouseOutUsed) {
+          texts.on('mouseout', (event: MouseEvent, word: any) => {
+            this.wordMouseOut.emit({ event, word });
+          });
+        }
+      });
+    layout.start();
   }
 
-  private renderCloud(): void {
-    if (this.wordcloud != null) {
-      const errors = this.cloudService.renderCloud(this.wordcloud?.nativeElement, this.applyOptions());
-      if(errors != null && errors.length > 0) {
-        const messages = errors.map((error) => error.message);
-        console.error(...messages);
-      }     
-    }  
-  }
+  private validateProps(): void {
+    if (!this.data || !Array.isArray(this.data)) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [data] must be an array. Current value is: [${this.data}]`
+      );
+    }
 
-  private createOptions(): AngularD3CloudOptions {
-    return {
-      data: this.data,
-      width: this.width,
-      height: this.height,
-      padding: this.padding,
-      font: this.font,
-      fontSizeMapper: this.fontSizeMapper,
-      rotate: this.rotate,
-      autoFill: this.autoFill,
-      fillMapper: this.fillMapper,
-      animations: this.animations,
-      speed: this.speed,
-      fontWeight: this.fontWeight,
-      fontStyle: this.fontStyle,
-      tooltip: this.tooltip,
-      hover: this.hover,
-      selection: this.selection,
-      theme: this.theme,
-      mouseClickObserved: this.wordClick.observed,
-      mouseOverObserved: this.wordMouseOver.observed,
-      mouseMoveObserved: this.wordMouseMove.observed,
-      mouseOutObserved: this.wordMouseOut.observed
-    };
-  }
+    if (
+      this.height === null ||
+      this.height === undefined ||
+      isNaN(this.height) ||
+      this.height <= 0
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [height] must be a positive number (greater than 0). Current value is: [${this.height}]`
+      );
+    }
 
-  private applyOptions(): AngularD3CloudOptions {
-    this.options.data = clone(this.data);
-    this.options.width = this.width;
-    this.options.height = this.height;
-    this.options.padding = this.padding;
-    this.options.font = this.font;
-    this.options.fontSizeMapper = this.fontSizeMapper;
-    this.options.rotate = this.rotate;
-    this.options.autoFill = this.autoFill;
-    this.options.fillMapper = this.fillMapper;
-    this.options.animations = this.animations;
-    this.options.speed = this.speed;
-    this.options.fontWeight = this.fontWeight;
-    this.options.fontStyle = this.fontStyle;
-    this.options.tooltip = this.tooltip;
-    this.options.hover = this.hover;
-    this.options.selection = this.selection;
-    this.options.theme = this.theme;
-    this.options.mouseClickObserved = this.wordClick.observed;
-    this.options.mouseOverObserved = this.wordMouseOver.observed;
-    this.options.mouseMoveObserved = this.wordMouseMove.observed;
-    this.options.mouseOutObserved = this.wordMouseOut.observed;   
-    
-    return this.options;
+    if (
+      this.width === null ||
+      this.width === undefined ||
+      isNaN(this.width) ||
+      this.width <= 0
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [width] must be a positive number (greater than 0). Current value is: [${this.width}]`
+      );
+    }
+
+    if (
+      this.padding == null ||
+      this.padding === undefined ||
+      !['number', 'function'].includes(typeof this.padding) ||
+      (typeof this.padding === 'number' && this.padding < 0)
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [padding] must be a positive number or function. Current value is: [${this.padding}]`
+      );
+    }
+
+    if (
+      this.font === null ||
+      this.font === undefined ||
+      !['string', 'function'].includes(typeof this.font)
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [font] must be a positive string or function. Current value is: [${this.font}]`
+      );
+    }
+
+    if (!this.fontSizeMapper || typeof this.fontSizeMapper !== 'function') {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [fontSizeMapper] must be a function. Current value is: [${this.fontSizeMapper}]`
+      );
+    }
+
+    if (this.fillMapper && typeof this.fillMapper !== 'function') {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [fillMapper] must be a function. Current value is: [${this.fillMapper}]`
+      );
+    }
+
+    if (
+      this.rotate === null ||
+      this.rotate === undefined ||
+      !['number', 'function'].includes(typeof this.rotate) ||
+      (typeof this.rotate === 'number' && this.rotate < 0)
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [rotate] must be a positive number or function. Current value is: [${this.rotate}]`
+      );
+    }
+
+    if (
+      this.autoFill === null ||
+      this.autoFill === undefined ||
+      typeof this.autoFill !== 'boolean'
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [autoFill] must be boolean. Current value is: [${this.autoFill}]`
+      );
+    }
+
+    if (
+      this.fontWeight === null ||
+      this.fontWeight === undefined ||
+      !['number', 'string'].includes(typeof this.fontWeight) ||
+      (typeof this.fontWeight === 'number' && this.fontWeight < 0)
+    ) {
+      throw new TypeError(
+        `${AngularD3CloudComponent.TAG}: [fontWeight] must be a positive number or a string. Current value is: [${this.fontWeight}]`
+      );
+    }
   }
 }

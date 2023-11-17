@@ -2,7 +2,11 @@
   "name": "@talentia/angular-d3-cloud",
   "title": "Angular D3 Word Cloud",
   "description": "D3 word cloud component for Angular built upon d3-cloud",
-  "version": "1.4.8",
+  "version": "1.5.0",
+  "peerDependencies": {
+    "@angular/common": "^15.0.0",
+    "@angular/core": "^15.0.0"
+  },
   "dependencies": {
     "d3-cloud": "^1.2.5",
     "d3-scale": "^4.0.2",
@@ -17,11 +21,7 @@
     "@types/d3-selection": "^3.0.3",
     "@types/d3-transition": "^3.0.2"
   },
-  "peerDependencies": {
-    "@angular/common": "^15.2.9",
-    "@angular/core": "^15.2.9"
-  },
-  "schematics": "./schematics/collection.json",
+  "sideEffects": false,
   "author": {
     "name": "Leonardo Cavone",
     "url": "https://github.com/Talentia-Software-OSS"
@@ -34,7 +34,7 @@
     }
   ],
   "repository": {
-    "url": "https://github.com/Talentia-Software-OSS/d3-cloud-angular",
+    "url": "https://github.com/Talentia-Software-OSS/d3-cloud-angular.git",
     "type": "git"
   },
   "bugs": {
